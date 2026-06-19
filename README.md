@@ -90,6 +90,7 @@ Tayyor! Yangi a'zolar CAPTCHA orqali o'tadi, spam xabarlar avto-o'chiriladi.
 
 | Buyruq | Vazifa |
 |--------|--------|
+| `/stats` | Bot statistikasi: guruhlar soni, jami a'zolar (qamrov), o'chirilgan spam / ban / CAPTCHA hisobi. Bot bilan **shaxsiy chatда** ham ishlaydi. |
 | `/words` | Bloklangan so'zlar ro'yxati |
 | `/addword <so'z>` | Yangi so'z/ibora qo'shish |
 | `/delword <so'z>` | Qo'shilgan so'zni o'chirish |

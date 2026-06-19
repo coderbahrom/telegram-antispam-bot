@@ -6,6 +6,7 @@ from aiogram.enums import ChatType
 from aiogram.types import Message
 
 import config
+import metrics
 import state
 from filters.spam import score_message
 from utils import is_admin_user, log_action
@@ -18,6 +19,8 @@ logger = logging.getLogger("antispam.filter")
 async def moderate(message: Message, bot: Bot) -> None:
     if message.chat.type not in (ChatType.GROUP, ChatType.SUPERGROUP):
         return
+    # bot allaqachon turgan guruhlarni ham statistikaga olamiz (faqat o'zgarsa yoziladi)
+    metrics.add_group(message.chat.id, message.chat.title or str(message.chat.id))
     # anonim admin / kanal nomidan yuborilgan xabarlarga tegmaymiz
     if message.sender_chat is not None:
         return
@@ -39,6 +42,7 @@ async def moderate(message: Message, bot: Bot) -> None:
 
     try:
         await message.delete()
+        metrics.incr("spam_deleted")
     except Exception as exc:  # noqa: BLE001
         logger.warning("xabarni o'chirish xato: %s", exc)
 
@@ -46,6 +50,7 @@ async def moderate(message: Message, bot: Bot) -> None:
     if config.SPAM_ACTION == "ban":
         try:
             await bot.ban_chat_member(message.chat.id, user.id)
+            metrics.incr("banned")
             action = "o'chirildi + ban"
         except Exception as exc:  # noqa: BLE001
             logger.warning("ban xato: %s", exc)

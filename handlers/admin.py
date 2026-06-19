@@ -16,6 +16,7 @@ _HELP = (
     "Meni guruhga <b>admin</b> qiling — quyidagi huquqlar bilan:\n"
     "• Delete messages\n• Ban users\n• Restrict members\n\n"
     "<b>Buyruqlar (faqat guruh adminlari):</b>\n"
+    "/stats — bot statistikasi (guruhlar, qamrov, ish hisobi)\n"
     "/words — bloklangan so'zlar ro'yxati\n"
     "/addword &lt;so'z&gt; — yangi so'z/ibora qo'shish\n"
     "/delword &lt;so'z&gt; — qo'shilgan so'zni o'chirish\n"

@@ -1,6 +1,8 @@
 # Secrets & runtime
 .env
 data/custom_keywords.json
+data/groups.json
+data/counters.json
 
 # Python
 __pycache__/

@@ -7,7 +7,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
 import config
-from handlers import admin, antispam, captcha
+from handlers import admin, antispam, captcha, stats
 
 logging.basicConfig(
     level=logging.INFO,
@@ -22,8 +22,9 @@ async def main() -> None:
 
     bot = Bot(token=config.BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = Dispatcher()
-    # tartib muhim: admin buyruqlari avval, keyin captcha, oxirida umumiy filtr
+    # tartib muhim: buyruqlar avval, keyin captcha, oxirida umumiy filtr
     dp.include_router(admin.router)
+    dp.include_router(stats.router)
     dp.include_router(captcha.router)
     dp.include_router(antispam.router)
 
