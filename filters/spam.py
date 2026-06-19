@@ -13,6 +13,12 @@ from data.keywords import get_keywords
 # Apostrof variantlarini bitta belgiga keltirish (o'ting / oʻting / o`ting ...)
 _APOST = str.maketrans({"`": "'", "ʻ": "'", "‘": "'", "’": "'", "´": "'", "ʼ": "'"})
 
+# Ko'rinmas / zero-width / yo'nalish belgilari — spammerlar so'z ichiga
+# (masalan "pro<zwnj><bom>filimga") qo'yib filtrni chalg'itadi. Olib tashlaymiz.
+#   00ad soft hyphen | 180e | 200b-200f zwsp/zwnj/zwj/lrm/rlm
+#   202a-202e yo'nalish | 2060-2064 word-joiner va h.k. | feff BOM
+_INVISIBLE_RE = re.compile("[\u00ad\u180e\u200b-\u200f\u202a-\u202e\u2060-\u2064\ufeff]")
+
 # Intim/jozibali emojilar (bittasi bo'lsa +1)
 _SUGGESTIVE_EMOJI = ["😘", "😍", "🥵", "🍑", "🔥", "💋", "😏", "😉", "👅", "🍆", "💦", "🌶", "🥰", "😈"]
 
@@ -21,6 +27,7 @@ _URL_RE = re.compile(r"(https?://|www\.|t\.me/|telegram\.me/|telegra\.ph/|@[A-Za
 
 
 def normalize(text: str) -> str:
+    text = _INVISIBLE_RE.sub("", text)  # ko'rinmas belgilarni olib tashlash (filtr aldovi)
     # apostrof variantlarini olib tashlaymiz: "o'ting" va "oting" bir xil hisoblanadi
     text = text.translate(_APOST).lower().replace("'", "")
     return re.sub(r"\s+", " ", text).strip()

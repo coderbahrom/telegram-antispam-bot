@@ -15,14 +15,11 @@ _DIR = os.path.dirname(__file__)
 _CUSTOM_PATH = os.path.join(_DIR, "custom_keywords.json")
 
 DEFAULT_KEYWORDS: list[str] = [
-    # "profilimga o'ting" turidagi klassik spam (apostrof variantlari normalize qilinadi)
-    "profilimga o'ting",
-    "profilimga kir",
-    "profilime o'ting",
-    "profilimni kor",
-    "profilimga kel",
-    "akkauntimga o'ting",
-    "menga yozing",
+    # "profilim..." turidagi klassik spam. O'zak shakl barcha ko'rinishlarni tutadi:
+    # profilimga / profilimda / profilimni / profilim sizni ... (apostrof + ko'rinmas
+    # belgilar normalize'da olib tashlanadi). Yolg'iz +2 — harakatga 2-signal kerak.
+    "profilim",
+    "akkauntim",
     # zavq / intim
     "zavqlaning",
     "zavq olasiz",
