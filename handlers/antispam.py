@@ -42,7 +42,7 @@ async def moderate(message: Message, bot: Bot) -> None:
 
     try:
         await message.delete()
-        metrics.incr("spam_deleted")
+        metrics.incr(message.chat.id, "spam_deleted")
     except Exception as exc:  # noqa: BLE001
         logger.warning("xabarni o'chirish xato: %s", exc)
 
@@ -50,7 +50,7 @@ async def moderate(message: Message, bot: Bot) -> None:
     if config.SPAM_ACTION == "ban":
         try:
             await bot.ban_chat_member(message.chat.id, user.id)
-            metrics.incr("banned")
+            metrics.incr(message.chat.id, "banned")
             action = "o'chirildi + ban"
         except Exception as exc:  # noqa: BLE001
             logger.warning("ban xato: %s", exc)

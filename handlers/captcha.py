@@ -82,7 +82,7 @@ async def _kick_timer(bot: Bot, chat_id: int, user_id: int, msg_id: int, name: s
             # ban + unban = kick (qayta kira oladi, lekin avto-spam to'xtaydi)
             await bot.ban_chat_member(chat_id, user_id)
             await bot.unban_chat_member(chat_id, user_id)
-            metrics.incr("captcha_kicked")
+            metrics.incr(chat_id, "captcha_kicked")
         except Exception as exc:  # noqa: BLE001
             logger.warning("kick xato: %s", exc)
         try:
@@ -112,7 +112,7 @@ async def on_captcha_click(call: CallbackQuery, bot: Bot) -> None:
     chat_id = call.message.chat.id
     try:
         await bot.restrict_chat_member(chat_id, target_id, permissions=_UNMUTED)
-        metrics.incr("captcha_passed")
+        metrics.incr(chat_id, "captcha_passed")
     except Exception as exc:  # noqa: BLE001
         logger.warning("ochish (unmute) xato: %s", exc)
 

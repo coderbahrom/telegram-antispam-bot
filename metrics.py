@@ -1,8 +1,11 @@
-"""Statistika — bot qaysi guruhlarda ekani va harakat hisoblagichlari.
+"""Statistika — bot qaysi guruhlarda ekani va HAR GURUH bo'yicha harakat hisobi.
 
 Ma'lumotlar data/ ichida JSON sifatida saqlanadi (volume orqali konteyner
 qayta ishga tushganda ham yo'qolmaydi). RAM'da kesh — har xabarda diskka
 yozilmaydi, faqat o'zgarganда yoziladi.
+
+counters.json tuzilishi (har guruh alohida):
+    { "<chat_id>": {"spam_deleted": 0, "banned": 0, ...}, ... }
 """
 import json
 import os
@@ -19,7 +22,7 @@ _DEFAULT_COUNTERS = {
 }
 
 _groups: dict[str, str] | None = None
-_counters: dict[str, int] | None = None
+_counters: dict[str, dict[str, int]] | None = None
 
 
 def _load(path: str, default):
@@ -62,18 +65,37 @@ def remove_group(chat_id: int) -> None:
         _save(_GROUPS_PATH, groups)
 
 
-# ---- Hisoblagichlar ----
-def get_counters() -> dict[str, int]:
+# ---- Hisoblagichlar (har guruh bo'yicha) ----
+def _all_counters() -> dict[str, dict[str, int]]:
     global _counters
     if _counters is None:
-        _counters = dict(_DEFAULT_COUNTERS)
         loaded = _load(_COUNTERS_PATH, {})
+        # faqat to'g'ri tuzilishni qabul qilamiz (eski/buzilgan formatni e'tiborsiz qoldiramiz)
+        _counters = {}
         if isinstance(loaded, dict):
-            _counters.update({k: int(v) for k, v in loaded.items() if k in _DEFAULT_COUNTERS})
+            for cid, vals in loaded.items():
+                if isinstance(vals, dict):
+                    _counters[cid] = {k: int(vals.get(k, 0)) for k in _DEFAULT_COUNTERS}
     return _counters
 
 
-def incr(key: str, n: int = 1) -> None:
-    counters = get_counters()
-    counters[key] = counters.get(key, 0) + n
+def incr(chat_id: int, key: str, n: int = 1) -> None:
+    counters = _all_counters()
+    group = counters.setdefault(str(chat_id), dict(_DEFAULT_COUNTERS))
+    group[key] = group.get(key, 0) + n
     _save(_COUNTERS_PATH, counters)
+
+
+def get_counters(chat_id: int) -> dict[str, int]:
+    """Bitta guruh hisoblagichlari."""
+    group = _all_counters().get(str(chat_id), {})
+    return {k: int(group.get(k, 0)) for k in _DEFAULT_COUNTERS}
+
+
+def get_total_counters() -> dict[str, int]:
+    """Barcha guruhlar bo'yicha yig'indi (egasi uchun umumiy ko'rinish)."""
+    total = dict(_DEFAULT_COUNTERS)
+    for group in _all_counters().values():
+        for k in _DEFAULT_COUNTERS:
+            total[k] += int(group.get(k, 0))
+    return total
