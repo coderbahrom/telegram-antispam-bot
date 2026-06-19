@@ -3,6 +3,7 @@ services:
     build: .
     restart: unless-stopped
     env_file: .env
-    # /addword orqali qo'shilgan so'zlar konteyner qayta ishga tushganda yo'qolmasligi uchun:
+    # /addword orqali qo'shilgan so'zlar konteyner qayta ishga tushganda yo'qolmasligi uchun
+    # butun data/ papkasini ulaymiz (yagona fayl ulansa Docker uni papka deb yaratib yuboradi):
     volumes:
-      - ./data/custom_keywords.json:/app/data/custom_keywords.json
+      - ./data:/app/data
