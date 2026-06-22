@@ -33,6 +33,7 @@ def _counters_block(c: dict[str, int]) -> str:
     return (
         "🛡 <b>Bajarilgan ishlar:</b>\n"
         f"• Spam o'chirildi: {c['spam_deleted']}\n"
+        f"• Ogohlantirildi: {c['warned']}\n"
         f"• Ban qilindi: {c['banned']}\n"
         f"• CAPTCHA o'tdi: {c['captcha_passed']}\n"
         f"• CAPTCHA chetlatildi: {c['captcha_kicked']}"

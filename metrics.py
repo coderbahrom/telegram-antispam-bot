@@ -16,6 +16,7 @@ _COUNTERS_PATH = os.path.join(_DIR, "counters.json")
 
 _DEFAULT_COUNTERS = {
     "spam_deleted": 0,
+    "warned": 0,
     "banned": 0,
     "captcha_passed": 0,
     "captcha_kicked": 0,

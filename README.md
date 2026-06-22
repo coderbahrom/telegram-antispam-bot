@@ -104,7 +104,9 @@ Tayyor! Yangi a'zolar CAPTCHA orqali o'tadi, spam xabarlar avto-o'chiriladi.
 | `ADMIN_IDS` | Bot adminlari (vergul bilan ID) | bo'sh |
 | `CAPTCHA_ENABLED` | CAPTCHA yoqilganmi | `true` |
 | `CAPTCHA_TIMEOUT` | Tugma bosish vaqti (soniya) | `60` |
-| `SPAM_ACTION` | `ban` yoki `delete` | `ban` |
+| `SPAM_ACTION` | `warn` (o'chir + ogohlantir, ban yo'q) / `ban` (o'chir + ban) / `delete` (jim o'chir) | `warn` |
+| `WARN_TEXT` | `warn` rejimi ogohlantirish matni (`{user}` → foydalanuvchi) | ⚠️ ...reklama tarqatmang |
+| `WARN_DELETE_AFTER` | Ogohlantirish necha soniyada o'zi o'chsin (`0` = o'chmaydi) | `15` |
 | `SPAM_THRESHOLD` | Harakat uchun kerakli ball | `3` |
 | `NEW_USER_WINDOW` | "Yangi a'zo" oynasi (soniya) | `3600` |
 | `DELETE_SERVICE_MESSAGES` | Kirish/chiqish xabarlarini o'chir | `true` |
