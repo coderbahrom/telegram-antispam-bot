@@ -51,7 +51,18 @@ AD_KEYWORDS: list[str] = [
     "tezkor pul",
     "pul ishlash",
     "investitsiya",
+    "investment",
     "daromad qiling",
+    # kripto firibgarlik (ko'pincha inglizcha)
+    "crypto",
+    "kripto",
+    "bitcoin",
+    "pump",
+    "signal",
+    "trading",
+    "binance",
+    "usdt",
+    "sarmoya",
 ]
 
 # Ballash uchun barcha asosiy so'zlar

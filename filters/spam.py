@@ -76,4 +76,10 @@ def score_message(message: Message) -> tuple[int, list[str], bool]:
         score += 2
         reasons.append("forward-kanal")
 
+    # 5) Forward qilingan STORY — bot uning ichini o'qiy olmaydi, guruhда deyarli
+    #    doim spam/reklama (kripto, kanal reklamasi...). O'zi yetarli ball beramiz.
+    if getattr(message, "story", None) is not None:
+        score += 3
+        reasons.append("forward-story")
+
     return score, reasons, is_hard
