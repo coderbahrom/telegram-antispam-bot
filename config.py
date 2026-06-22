@@ -38,7 +38,7 @@ ADMIN_IDS: set[int] = _ids(os.getenv("ADMIN_IDS"))
 CAPTCHA_ENABLED: bool = _bool(os.getenv("CAPTCHA_ENABLED"), True)
 CAPTCHA_TIMEOUT: int = _int(os.getenv("CAPTCHA_TIMEOUT"), 60)
 
-SPAM_ACTION: str = os.getenv("SPAM_ACTION", "warn").strip().lower()
+SPAM_ACTION: str = os.getenv("SPAM_ACTION", "hybrid").strip().lower()
 SPAM_THRESHOLD: int = _int(os.getenv("SPAM_THRESHOLD"), 3)
 NEW_USER_WINDOW: int = _int(os.getenv("NEW_USER_WINDOW"), 3600)
 

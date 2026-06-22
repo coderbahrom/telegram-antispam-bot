@@ -14,8 +14,9 @@ import os
 _DIR = os.path.dirname(__file__)
 _CUSTOM_PATH = os.path.join(_DIR, "custom_keywords.json")
 
-DEFAULT_KEYWORDS: list[str] = [
-    # "profilim..." turidagi klassik spam. O'zak shakl barcha ko'rinishlarni tutadi:
+# "Qattiq" so'zlar — porn / phishing / profil-spam. hybrid rejimda BAN qilinadi.
+BAN_KEYWORDS: list[str] = [
+    # "profilim..." turidagi klassik phishing. O'zak shakl barcha ko'rinishlarni tutadi:
     # profilimga / profilimda / profilimni / profilim sizni ... (apostrof + ko'rinmas
     # belgilar normalize'da olib tashlanadi). Yolg'iz +2 — harakatga 2-signal kerak.
     "profilim",
@@ -24,17 +25,13 @@ DEFAULT_KEYWORDS: list[str] = [
     "zavqlaning",
     "zavq olasiz",
     "rohatlaning",
-    # video / kanal reklama
+    # intim video
     "eng sokin video",
     "sokin videom",
     "eng issiq video",
     "issiq videom",
     "videolarimni kor",
     "videomni kor",
-    "kanalimga o'ting",
-    "kanalimga obuna",
-    "kanalimga kir",
-    "obuna bol",
     # ochiq mazmun
     "seks",
     "porno",
@@ -43,12 +40,22 @@ DEFAULT_KEYWORDS: list[str] = [
     "18+",
     "kattalar uchun",
     "erotik",
-    # to'lov / xizmat spam
+]
+
+# "Yumshoq" so'zlar — oddiy reklama. hybrid rejimda faqat OGOHLANTIRILADI.
+AD_KEYWORDS: list[str] = [
+    "kanalimga o'ting",
+    "kanalimga obuna",
+    "kanalimga kir",
+    "obuna bol",
     "tezkor pul",
     "pul ishlash",
     "investitsiya",
     "daromad qiling",
 ]
+
+# Ballash uchun barcha asosiy so'zlar
+DEFAULT_KEYWORDS: list[str] = BAN_KEYWORDS + AD_KEYWORDS
 
 
 def _load_custom() -> list[str]:
@@ -68,9 +75,18 @@ def _save_custom(words: list[str]) -> None:
 
 
 def get_keywords() -> list[str]:
-    """Asosiy + custom so'zlar (takrorlanmasdan)."""
+    """Ballash uchun barcha so'zlar: asosiy + custom (takrorlanmasdan)."""
     seen: list[str] = []
     for w in DEFAULT_KEYWORDS + _load_custom():
+        if w not in seen:
+            seen.append(w)
+    return seen
+
+
+def get_ban_keywords() -> list[str]:
+    """hybrid rejimda BAN qiladigan "qattiq" so'zlar: porn/phishing + qo'lda qo'shilganlar."""
+    seen: list[str] = []
+    for w in BAN_KEYWORDS + _load_custom():
         if w not in seen:
             seen.append(w)
     return seen

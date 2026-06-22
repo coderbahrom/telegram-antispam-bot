@@ -8,7 +8,7 @@ import re
 
 from aiogram.types import Message
 
-from data.keywords import get_keywords
+from data.keywords import get_ban_keywords, get_keywords
 
 # Apostrof variantlarini bitta belgiga keltirish (o'ting / oʻting / o`ting ...)
 _APOST = str.maketrans({"`": "'", "ʻ": "'", "‘": "'", "’": "'", "´": "'", "ʼ": "'"})
@@ -33,18 +33,23 @@ def normalize(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def score_message(message: Message) -> tuple[int, list[str]]:
-    """Xabarning spam balini va sabablar ro'yxatini qaytaradi."""
+def score_message(message: Message) -> tuple[int, list[str], bool]:
+    """Xabarning spam balini, sabablar ro'yxatini va `is_hard` (porn/phishing → ban) ni qaytaradi."""
     text = message.text or message.caption or ""
     norm = normalize(text)
     score = 0
     reasons: list[str] = []
+    is_hard = False
+    ban_set = {normalize(k) for k in get_ban_keywords()}
 
     # 1) bloklangan so'z/iboralar (har biri +2)
     for kw in get_keywords():
-        if normalize(kw) in norm:
+        nk = normalize(kw)
+        if nk in norm:
             score += 2
             reasons.append(f"so'z:'{kw}'")
+            if nk in ban_set:
+                is_hard = True  # qattiq spam — hybrid rejimda ban
 
     # 2) jozibali emoji (+1)
     if any(emoji in text for emoji in _SUGGESTIVE_EMOJI):
@@ -71,4 +76,4 @@ def score_message(message: Message) -> tuple[int, list[str]]:
         score += 2
         reasons.append("forward-kanal")
 
-    return score, reasons
+    return score, reasons, is_hard

@@ -52,7 +52,7 @@ async def moderate(message: Message, bot: Bot) -> None:
     if await is_admin_user(bot, message.chat.id, user.id):
         return
 
-    score, reasons = score_message(message)
+    score, reasons, is_hard = score_message(message)
     # yangi qo'shilgan a'zo bo'lsa qattiqroq qaraymiz (+1)
     if state.joined_recently(message.chat.id, user.id, config.NEW_USER_WINDOW):
         score += 1
@@ -67,15 +67,20 @@ async def moderate(message: Message, bot: Bot) -> None:
     except Exception as exc:  # noqa: BLE001
         logger.warning("xabarni o'chirish xato: %s", exc)
 
+    # hybrid: qattiq spam (porn/phishing) -> ban, oddiy reklama -> ogohlantirish
+    mode = config.SPAM_ACTION
+    if mode == "hybrid":
+        mode = "ban" if is_hard else "warn"
+
     action = "xabar o'chirildi"
-    if config.SPAM_ACTION == "ban":
+    if mode == "ban":
         try:
             await bot.ban_chat_member(message.chat.id, user.id)
             metrics.incr(message.chat.id, "banned")
             action = "o'chirildi + ban"
         except Exception as exc:  # noqa: BLE001
             logger.warning("ban xato: %s", exc)
-    elif config.SPAM_ACTION == "warn":
+    elif mode == "warn":
         await _send_warning(bot, message.chat.id, user)
         metrics.incr(message.chat.id, "warned")
         action = "o'chirildi + ogohlantirildi"
