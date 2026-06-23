@@ -40,6 +40,11 @@ BAN_KEYWORDS: list[str] = [
     "18+",
     "kattalar uchun",
     "erotik",
+    # profil/bio porn-spam (masalan "joylar cheklangan 🔞", "HotVideolarim24")
+    "joylar cheklangan",
+    "videolarim",
+    "hotvideo",
+    "hot video",
 ]
 
 # "Yumshoq" so'zlar — oddiy reklama. hybrid rejimda faqat OGOHLANTIRILADI.

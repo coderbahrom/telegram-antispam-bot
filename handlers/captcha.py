@@ -17,6 +17,7 @@ from aiogram.types import (
 import config
 import metrics
 import state
+from filters.spam import profile_is_spam
 from utils import log_action
 
 router = Router(name="captcha")
@@ -47,6 +48,11 @@ async def on_join(event: ChatMemberUpdated, bot: Bot) -> None:
     if user.is_bot:
         return
 
+    # Profil tekshiruvi: bio + ism + shaxsiy kanal nomi porn/phishing bo'lsa
+    # CAPTCHA'ni ham kutmasdan darrov ban (xabari toza bo'lsa ham — masalan "Salom")
+    if await _ban_if_profile_spam(bot, chat.id, user):
+        return
+
     state.mark_join(chat.id, user.id)
     if not config.CAPTCHA_ENABLED:
         return
@@ -73,6 +79,37 @@ async def on_join(event: ChatMemberUpdated, bot: Bot) -> None:
     _pending[(chat.id, user.id)] = asyncio.create_task(
         _kick_timer(bot, chat.id, user.id, msg.message_id, user.full_name)
     )
+
+
+async def _ban_if_profile_spam(bot: Bot, chat_id: int, user) -> bool:
+    """Foydalanuvchi profilini (bio + ism + shaxsiy kanal) tekshiradi; porn/phishing
+    bo'lsa ban qiladi. Bot bio'ni getChat orqali o'qiydi (xabar matni emas)."""
+    bio = ""
+    channel = ""
+    try:
+        info = await bot.get_chat(user.id)
+        bio = getattr(info, "bio", "") or ""
+        personal = getattr(info, "personal_chat", None)
+        if personal is not None:
+            channel = personal.title or ""
+    except Exception as exc:  # noqa: BLE001 — o'qib bo'lmasa, oddiy CAPTCHA'ga o'tamiz
+        logger.debug("profil o'qish xato: %s", exc)
+
+    is_spam, reasons = profile_is_spam(user.full_name or "", bio, channel)
+    if not is_spam:
+        return False
+    try:
+        await bot.ban_chat_member(chat_id, user.id)
+        metrics.incr(chat_id, "banned")
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("profil-spam ban xato: %s — bot admin emas?", exc)
+        return False
+    await log_action(
+        bot,
+        f"🚫 Profil-spam ban: {user.full_name} <code>{user.id}</code> — {', '.join(reasons)}",
+    )
+    logger.info("Profil-spam ban: %s (%s) — %s", user.full_name, user.id, reasons)
+    return True
 
 
 async def _kick_timer(bot: Bot, chat_id: int, user_id: int, msg_id: int, name: str) -> None:
