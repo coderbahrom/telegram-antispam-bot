@@ -27,6 +27,10 @@ _SOFT_EMOJI = ["😘", "😍", "🥵", "🔥", "💋", "😏", "😉", "🌶", "
 # Link / mention / kanal havolasi
 _URL_RE = re.compile(r"(https?://|www\.|t\.me/|telegram\.me/|telegra\.ph/|@[A-Za-z]\w{3,})", re.IGNORECASE)
 
+# Maxfiy "invite" havolalari (t.me/+... , joinchat) — oddiy a'zolar kam ishlatadi,
+# deyarli doim reklama/scam (tilдан qat'i nazar). Kuchli signal (+3, o'zi yetadi).
+_INVITE_RE = re.compile(r"(t\.me/\+|t\.me/joinchat/|telegram\.me/\+|telegram\.me/joinchat/)", re.IGNORECASE)
+
 
 def normalize(text: str) -> str:
     text = _INVISIBLE_RE.sub("", text)  # ko'rinmas belgilarni olib tashlash (filtr aldovi)
@@ -79,14 +83,18 @@ def score_message(message: Message) -> tuple[int, list[str], bool]:
     text = message.text or message.caption or ""
     score, reasons, is_hard = score_text(text)
 
-    # 3) link / @mention / kanal havolasi (+2)
+    # 3) link / invite-link. Yashirin (text_link) havolalarni ham tekshiramiz.
+    invite = bool(_INVITE_RE.search(text))
     has_link = bool(_URL_RE.search(text))
-    if not has_link:
-        for ent in (message.entities or []) + (message.caption_entities or []):
-            if ent.type in ("url", "text_link", "mention"):
-                has_link = True
-                break
-    if has_link:
+    for ent in (message.entities or []) + (message.caption_entities or []):
+        if ent.type == "text_link" and ent.url and _INVITE_RE.search(ent.url):
+            invite = True
+        if ent.type in ("url", "text_link", "mention"):
+            has_link = True
+    if invite:
+        score += 3
+        reasons.append("invite-link")
+    elif has_link:
         score += 2
         reasons.append("link")
 
