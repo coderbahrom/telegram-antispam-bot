@@ -68,6 +68,16 @@ AD_KEYWORDS: list[str] = [
     "binance",
     "usdt",
     "sarmoya",
+    # ruscha "yengil daromad / yozgi ish" scam
+    "заработок",
+    "заработай",
+    "заработать",
+    "подработка",
+    "доход",
+    "вакансия",
+    "удалённая работа",
+    "удаленная работа",
+    "пиши в личку",
 ]
 
 # Ballash uchun barcha asosiy so'zlar
