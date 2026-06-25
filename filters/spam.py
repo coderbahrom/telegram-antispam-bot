@@ -31,6 +31,14 @@ _URL_RE = re.compile(r"(https?://|www\.|t\.me/|telegram\.me/|telegra\.ph/|@[A-Za
 # deyarli doim reklama/scam (tilдан qat'i nazar). Kuchli signal (+3, o'zi yetadi).
 _INVITE_RE = re.compile(r"(t\.me/\+|t\.me/joinchat/|telegram\.me/\+|telegram\.me/joinchat/)", re.IGNORECASE)
 
+# Pul-summa va'dasi: "14.000р", "5000₽", "$500", "от 5000 в день" — "yengil daromad"
+# scamlarining asosiy belgisi (tilдан qat'i nazar). Link bilan birga kuchli signal.
+_MONEY_RE = re.compile(
+    r"\d[\d\s.,]{2,}\s*(?:₽|руб|р\b|сум|so['ʻ`]?m|\$|€|usd|долл)"
+    r"|\bв\s+(?:день|неделю|месяц)\b",
+    re.IGNORECASE,
+)
+
 
 def normalize(text: str) -> str:
     text = _INVISIBLE_RE.sub("", text)  # ko'rinmas belgilarni olib tashlash (filtr aldovi)
@@ -97,6 +105,11 @@ def score_message(message: Message) -> tuple[int, list[str], bool]:
     elif has_link:
         score += 2
         reasons.append("link")
+
+    # pul-summa va'dasi (+2) — "yengil daromad" scam belgisi
+    if _MONEY_RE.search(text):
+        score += 2
+        reasons.append("pul-summa")
 
     # 4) kanal/guruhdan forward qilingan post (+2) — reklama uchun klassik
     origin = getattr(message, "forward_origin", None)
