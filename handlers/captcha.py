@@ -4,6 +4,7 @@ import asyncio
 import logging
 
 from aiogram import Bot, F, Router
+from aiogram.enums import ChatType
 from aiogram.filters import JOIN_TRANSITION, ChatMemberUpdatedFilter
 from aiogram.types import (
     CallbackQuery,
@@ -48,9 +49,15 @@ async def on_join(event: ChatMemberUpdated, bot: Bot) -> None:
     if user.is_bot:
         return
 
-    # Profil tekshiruvi: bio + ism + shaxsiy kanal nomi porn/phishing bo'lsa
-    # CAPTCHA'ni ham kutmasdan darrov ban (xabari toza bo'lsa ham — masalan "Salom")
+    # Profil tekshiruvi (guruh ham, KANAL ham): bio + ism + shaxsiy kanal nomi
+    # porn/phishing bo'lsa darrov ban (xabari toza bo'lsa ham — masalan "Salom")
     if await _ban_if_profile_spam(bot, chat.id, user):
+        return
+
+    # Kanalда CAPTCHA/restrict yo'q (obunachilar yozmaydi) — faqat profil tozalash.
+    # Oddiy va bo'sh akkauntlarga tegmaymiz (real obunachilarni yo'qotmaslik uchun).
+    if chat.type == ChatType.CHANNEL:
+        metrics.add_group(chat.id, chat.title or str(chat.id))
         return
 
     state.mark_join(chat.id, user.id)

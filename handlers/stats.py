@@ -18,8 +18,8 @@ _ACTIVE = {"member", "administrator"}
 
 @router.my_chat_member()
 async def on_bot_status_change(event: ChatMemberUpdated) -> None:
-    """Bot guruhga qo'shilganda/chiqarilganda guruhlar ro'yxatini yangilaydi."""
-    if event.chat.type not in (ChatType.GROUP, ChatType.SUPERGROUP):
+    """Bot guruh/kanalga qo'shilganda yoki chiqarilganda ro'yxatni yangilaydi."""
+    if event.chat.type not in (ChatType.GROUP, ChatType.SUPERGROUP, ChatType.CHANNEL):
         return
     if event.new_chat_member.status in _ACTIVE:
         metrics.add_group(event.chat.id, event.chat.title or str(event.chat.id))
