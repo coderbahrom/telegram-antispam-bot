@@ -27,6 +27,13 @@ _NSFW_CLASSES = {
     "ANUS_EXPOSED",
 }
 
+# "Suggestive" (ishvali, lekin yopiq) — yolg'iz ban qilmaydi, profil-kombinatsiya
+# balига +1 signal beradi (dekolteli real ayollar bundan ban bo'lmaydi).
+_SUGGESTIVE_CLASSES = {
+    "FEMALE_BREAST_COVERED",
+    "BUTTOCKS_COVERED",
+}
+
 
 def _get_detector():
     global _detector
@@ -42,17 +49,22 @@ def _detect_file(path: str) -> list[dict]:
     return _get_detector().detect(path)
 
 
-async def is_nsfw_profile_photo(bot: Bot, user_id: int) -> tuple[bool, str]:
-    """Foydalanuvchining profil rasmi 18+ bo'lsa (True, "rasm:...") qaytaradi."""
+async def check_profile_photo(bot: Bot, user_id: int) -> tuple[str, str]:
+    """Profil rasmini baholaydi: ("nsfw" | "suggestive" | "clean", sabab).
+
+    nsfw        — aniq 18+ (EXPOSED) → darrov ban
+    suggestive  — ishvali lekin yopiq (COVERED) → kombinatsiya baliga +1
+    clean       — signal yo'q / rasm yo'q / tekshirib bo'lmadi
+    """
     if not config.NSFW_CHECK_ENABLED:
-        return False, ""
+        return "clean", ""
     try:
         photos = await bot.get_user_profile_photos(user_id, limit=1)
     except Exception as exc:  # noqa: BLE001
         logger.debug("profil rasmini olish xato: %s", exc)
-        return False, ""
+        return "clean", ""
     if not photos.photos:
-        return False, ""  # rasm yo'q yoki maxfiylik yopiq
+        return "clean", ""  # rasm yo'q yoki maxfiylik yopiq
 
     # model kichik o'lchamda ishlaydi — ~640px atrofidagi versiyani olamiz (tez yuklanadi)
     sizes = photos.photos[0]
@@ -65,17 +77,24 @@ async def is_nsfw_profile_photo(bot: Bot, user_id: int) -> tuple[bool, str]:
         detections = await asyncio.get_running_loop().run_in_executor(None, _detect_file, tmp.name)
     except Exception as exc:  # noqa: BLE001
         logger.warning("NSFW tekshiruv xato: %s", exc)
-        return False, ""
+        return "clean", ""
     finally:
         try:
             os.unlink(tmp.name)
         except OSError:
             pass
 
+    suggestive_hit = ""
     for d in detections or []:
         cls = d.get("class", "")
         score = float(d.get("score", 0))
-        if cls in _NSFW_CLASSES and score >= config.NSFW_THRESHOLD:
+        if score < config.NSFW_THRESHOLD:
+            continue
+        if cls in _NSFW_CLASSES:
             logger.info("NSFW rasm topildi: user=%s %s(%.2f)", user_id, cls, score)
-            return True, f"rasm:{cls.lower()}({score:.2f})"
-    return False, ""
+            return "nsfw", f"rasm:{cls.lower()}({score:.2f})"
+        if cls in _SUGGESTIVE_CLASSES and not suggestive_hit:
+            suggestive_hit = f"rasm:{cls.lower()}({score:.2f})"
+    if suggestive_hit:
+        return "suggestive", suggestive_hit
+    return "clean", ""

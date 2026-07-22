@@ -59,5 +59,10 @@ try:
 except ValueError:
     NSFW_THRESHOLD = 0.6
 
+# Profil "kombinatsiya" bo'sag'asi: zaif signallar (emoji-kanal +2, faqat-mention
+# bio +1, gibberish mention +1, gibberish username +1, suggestive rasm +1)
+# yig'indisi shu qiymatga yetса — spam-profil deb ban qilinadi.
+PROFILE_THRESHOLD: int = _int(os.getenv("PROFILE_THRESHOLD"), 5)
+
 _log = os.getenv("LOG_CHAT_ID", "").strip()
 LOG_CHAT_ID: int | None = int(_log) if _log.lstrip("-").isdigit() else None

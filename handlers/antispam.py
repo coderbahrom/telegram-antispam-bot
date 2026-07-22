@@ -10,6 +10,7 @@ import config
 import metrics
 import state
 from filters.spam import score_message
+from moderation import ban_if_profile_spam
 from utils import is_admin_user, log_action
 
 router = Router(name="antispam")
@@ -51,6 +52,17 @@ async def moderate(message: Message, bot: Bot) -> None:
     # adminlarni tekshirmaymiz
     if await is_admin_user(bot, message.chat.id, user.id):
         return
+
+    # Birinchi marta ko'rgan userning PROFILINI tekshiramiz — "Salom" deb yozib,
+    # profilida porn-kanal ko'tarib yuruvchilar uchun (join'дан oldin kirganlar ham)
+    if not state.profile_checked(user.id):
+        state.mark_profile_checked(user.id)
+        if await ban_if_profile_spam(bot, message.chat.id, user):
+            try:
+                await message.delete()  # "Salom"ini ham o'chiramiz
+            except Exception:  # noqa: BLE001
+                pass
+            return
 
     score, reasons, is_hard = score_message(message)
     # yangi qo'shilgan a'zo bo'lsa qattiqroq qaraymiz (+1)

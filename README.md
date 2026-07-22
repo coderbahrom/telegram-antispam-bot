@@ -112,6 +112,7 @@ Tayyor! Yangi a'zolar CAPTCHA orqali o'tadi, spam xabarlar avto-o'chiriladi.
 | `DELETE_SERVICE_MESSAGES` | Kirish/chiqish xabarlarini o'chir | `true` |
 | `NSFW_CHECK_ENABLED` | Profil rasmini lokal AI bilan tekshirish | `true` |
 | `NSFW_THRESHOLD` | NSFW ishonch bo'sag'asi (0..1, kattaroq = ehtiyotkorroq) | `0.6` |
+| `PROFILE_THRESHOLD` | Profil kombinatsiya bo'sag'asi (zaif signallar yig'indisi) | `5` |
 | `LOG_CHAT_ID` | Loglar uchun chat ID (ixtiyoriy) | bo'sh |
 
 ## Ball (score) tizimi qanday ishlaydi
