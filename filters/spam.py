@@ -65,8 +65,11 @@ def score_text(text: str) -> tuple[int, list[str], bool]:
                 is_hard = True  # qattiq spam — hybrid rejimda ban
 
     # emoji: aniq 18+ → qattiq, jozibali → yumshoq
-    if any(e in text for e in _HARD_EMOJI):
-        score += 1
+    hard_hits = [e for e in _HARD_EMOJI if e in text]
+    if hard_hits:
+        # 🔞 (18+ belgisi — hech qachon begunoh ishlatilmaydi) yoki 2+ intim emoji
+        # birga kelsa — o'zi yetarli kuchli signal ("🔞💋🔞" kabi xabarlar uchun).
+        score += 3 if ("🔞" in hard_hits or len(hard_hits) >= 2) else 1
         reasons.append("emoji-18+")
         is_hard = True
     elif any(e in text for e in _SOFT_EMOJI):
