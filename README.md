@@ -5,17 +5,17 @@ akkauntlardan himoya qiluvchi bot. Python + [aiogram](https://docs.aiogram.dev) 
 
 ## Nima qiladi
 
-1. **CAPTCHA** — yangi a'zo qo'shilganda cheklanadi (yoza olmaydi), tugmani
-   bosсагина ochiladi. Vaqtida bosmasa chetlatiladi. Bu avtomatik spam-botlarni
-   darvozadayoq to'xtatadi (ular tugmani bosib o'tolmaydi).
-2. **Spam filtri** — har bir xabarni ball (score) tizimi bilan tekshiradi:
-   bloklangan so'z/ibora, intim emoji, link/kanal havolasi, kanaldan forward,
-   yangi a'zo — yetarli ball to'plasa xabar o'chiriladi va foydalanuvchi ban qilinadi.
-3. **Admin buyruqlari** — so'zlar ro'yxatini boshqarish va qo'lda ban.
-
-> ⚠️ **Eslatma:** Telegram Bot API boshqa foydalanuvchining profilidagi yashirin
-> kanal/bio'sini o'qiy olmaydi. Shuning uchun himoya **profilni tekshirish** emas,
-> **CAPTCHA + xabar filtri** asosida ishlaydi — bu shart-sharoitsiz samarali.
+1. **Profil tekshiruvi** — a'zo qo'shilganda ism + bio + shaxsiy kanal nomi
+   spam filtridan o'tkaziladi; porn/phishing bo'lsa darrov ban (guruh va kanalда).
+2. **NSFW rasm AI** — profil rasmi lokal NudeNet modeli bilan tekshiriladi;
+   18+ rasm topilsa darrov ban. Tashqi API yo'q, hammasi serverda.
+3. **CAPTCHA** — yangi a'zo cheklanadi (yoza olmaydi), tugmani bosсагина
+   ochiladi. Vaqtida bosmasa chetlatiladi.
+4. **Spam filtri** — har bir xabar ball (score) tizimi bilan tekshiriladi:
+   so'z/ibora (uz/ru/en, o'zaklar), 18+ emoji, link/invite-link, pul-summa
+   va'dasi, forward/story, yangi a'zo. `hybrid` rejimда porn/phishing → ban,
+   oddiy reklama → o'chirish + ogohlantirish.
+5. **Admin buyruqlari** — `/stats`, so'z boshqaruvi, qo'lda ban.
 
 ## 1-qadam: Bot yaratish (@BotFather)
 
@@ -110,6 +110,8 @@ Tayyor! Yangi a'zolar CAPTCHA orqali o'tadi, spam xabarlar avto-o'chiriladi.
 | `SPAM_THRESHOLD` | Harakat uchun kerakli ball | `3` |
 | `NEW_USER_WINDOW` | "Yangi a'zo" oynasi (soniya) | `3600` |
 | `DELETE_SERVICE_MESSAGES` | Kirish/chiqish xabarlarini o'chir | `true` |
+| `NSFW_CHECK_ENABLED` | Profil rasmini lokal AI bilan tekshirish | `true` |
+| `NSFW_THRESHOLD` | NSFW ishonch bo'sag'asi (0..1, kattaroq = ehtiyotkorroq) | `0.6` |
 | `LOG_CHAT_ID` | Loglar uchun chat ID (ixtiyoriy) | bo'sh |
 
 ## Ball (score) tizimi qanday ishlaydi

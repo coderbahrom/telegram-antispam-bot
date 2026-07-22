@@ -18,6 +18,7 @@ from aiogram.types import (
 import config
 import metrics
 import state
+from filters.nsfw import is_nsfw_profile_photo
 from filters.spam import profile_is_spam
 from utils import log_action
 
@@ -103,6 +104,11 @@ async def _ban_if_profile_spam(bot: Bot, chat_id: int, user) -> bool:
         logger.debug("profil o'qish xato: %s", exc)
 
     is_spam, reasons = profile_is_spam(user.full_name or "", bio, channel)
+    if not is_spam:
+        # matn toza bo'lsa — profil RASMINI tekshiramiz (NSFW modeli, lokal)
+        nsfw, why = await is_nsfw_profile_photo(bot, user.id)
+        if nsfw:
+            is_spam, reasons = True, [why]
     if not is_spam:
         return False
     try:

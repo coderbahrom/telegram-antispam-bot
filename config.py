@@ -52,5 +52,12 @@ WARN_DELETE_AFTER: int = _int(os.getenv("WARN_DELETE_AFTER"), 15)
 
 DELETE_SERVICE_MESSAGES: bool = _bool(os.getenv("DELETE_SERVICE_MESSAGES"), True)
 
+# NSFW (18+) profil rasmi tekshiruvi — lokal NudeNet modeli
+NSFW_CHECK_ENABLED: bool = _bool(os.getenv("NSFW_CHECK_ENABLED"), True)
+try:
+    NSFW_THRESHOLD: float = float(os.getenv("NSFW_THRESHOLD", "0.6"))
+except ValueError:
+    NSFW_THRESHOLD = 0.6
+
 _log = os.getenv("LOG_CHAT_ID", "").strip()
 LOG_CHAT_ID: int | None = int(_log) if _log.lstrip("-").isdigit() else None
